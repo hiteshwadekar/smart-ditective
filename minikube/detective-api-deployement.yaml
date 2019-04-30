@@ -1,0 +1,52 @@
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  name: styra-detective-api
+spec:
+  replicas: 1
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: styra-detective-api
+    spec:
+      containers:
+        - name: styra-detective-api
+          stdin: true
+          tty: true
+          args:
+            - styra-detective-api
+          image: styra-detective-api:latest
+          ports:
+            - name: api-pod-port
+              containerPort: 50051
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: config
+              readOnly: true
+              mountPath: /etc/config
+      restartPolicy: Always
+      volumes:
+        - name: config
+          configMap:
+            name: detective-api-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: styra-detective-api
+  name: styra-detective-api
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+    - name: api-pod-port
+      port: 50051
+      targetPort: api-pod-port
+  selector:
+    app: styra-detective-api
+---
