@@ -3,7 +3,7 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   creationTimestamp: null
-  name: styra-detective-api
+  name: smart-detective-api
 spec:
   replicas: 1
   strategy: {}
@@ -11,15 +11,15 @@ spec:
     metadata:
       creationTimestamp: null
       labels:
-        app: styra-detective-api
+        app: smart-detective-api
     spec:
       containers:
-        - name: styra-detective-api
+        - name: smart-detective-api
           stdin: true
           tty: true
           args:
-            - styra-detective-api
-          image: styra-detective-api:latest
+            - smart-detective-api
+          image: smart-detective-api:latest
           ports:
             - name: api-pod-port
               containerPort: 50051
@@ -38,8 +38,8 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: styra-detective-api
-  name: styra-detective-api
+    app: smart-detective-api
+  name: smart-detective-api
 spec:
   type: ClusterIP
   clusterIP: None
@@ -48,5 +48,5 @@ spec:
       port: 50051
       targetPort: api-pod-port
   selector:
-    app: styra-detective-api
+    app: smart-detective-api
 ---
