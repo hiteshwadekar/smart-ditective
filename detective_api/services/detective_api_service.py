@@ -181,4 +181,4 @@ class DetectiveApiService:
 
 
 if __name__ == "__main__":
-    print("Welcome to styra's detective solution")
+    print("Welcome to smart detective solution")

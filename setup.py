@@ -1,12 +1,12 @@
 import setuptools
 
 setuptools.setup(
-    name="styra-detective-api",
+    name="smart-detective-api",
     version="0.0.1",
     author="Hitesh Wadekar",
     author_email="hitesh.wadekar@gmail.com",
 
-    description="A microservice for Styra's detective witness api",
+    description="A microservice for Smart detective witness api",
     long_description=open('README.md').read(),
 
     packages=setuptools.find_packages(),
@@ -14,7 +14,7 @@ setuptools.setup(
     install_requires=[],
     entry_points={
         'console_scripts':
-            ['styra-detective-api = detective_api.api.detective_api_rpc:serve']
+            ['smart-detective-api = detective_api.api.detective_api_rpc:serve']
     },
 
     classifiers=[

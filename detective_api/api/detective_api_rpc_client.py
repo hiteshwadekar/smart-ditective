@@ -126,7 +126,7 @@ def get_program_args():
     command line arguments to the program.
     """
     parser = argparse.ArgumentParser(
-        description='Styra\'s witness analysis tools.'
+        description='Smart witness analysis tools.'
     )
     parser.add_argument(
         'witnesses_input_file',
