@@ -5,101 +5,101 @@ from detective_api.common import exceptions as dt_exception
 LOG = logging.getLogger(__name__)
 
 
-class DetectiveGraph:
+class Graph:
     def __init__(self):
         # Unique vertex list for wintness events.
-        self.witness_event_vertices = []
+        self.vertices = []
         # Graph structure for witness events.
-        self.witness_event_graph = defaultdict(list)
+        self.graph = defaultdict(list)
 
     @property
-    def witness_events(self):
-        return self.witness_event_vertices
+    def vertices(self):
+        return self.vertices
 
     @property
-    def wt_graph(self):
-        return self.witness_event_graph
+    def graph(self):
+        return self.graph
 
-    def addWinessEentVertices(self, unique_witness_vertices):
+    def init_vertices(self, unique_vertices_list):
         LOG.debug(
-            "addWinessEentVertices: initializing unique vertices"
-            % (unique_witness_vertices)
+            "init_vertices: initializing unique vertices"
+            % (unique_vertices_list)
         )
-        self.witness_event_vertices = unique_witness_vertices
+        self.vertices = unique_vertices_list
 
-    def addWitnessEventVertex(self, witness_event_name):
-        if witness_event_name not in self.witness_event_vertices:
-            self.witness_event_vertices.append(witness_event_name)
-            self.witness_event_graph[witness_event_name] = []
+    def add_vertex(self, vertex):
+        if vertex not in self.vertices:
+            self.vertices.append(vertex)
+            self.graph[vertex] = []
 
-    def addWitnessEventLink(self, fromEventVetex, toEventVertex=None):
-        if fromEventVetex:
+    def add_edge(self, from_vertex, to_vertex=None):
+        if from_vertex:
             LOG.debug(
-                "addWitnessEventLink: adding edge in"
+                "add_edge: adding edge in"
                 "graph from Vertex:%s to Vertex:%s "
-                % (fromEventVetex, toEventVertex)
+                % (from_vertex, to_vertex)
             )
-            self.witness_event_graph[fromEventVetex].append(toEventVertex)
+            self.graph[from_vertex].append(to_vertex)
 
-    def _get_single_path_for_witness_events(
-            self, fromeventvertex, toeventvertex, path=[]):
-        path = path + [fromeventvertex]
-        if fromeventvertex == toeventvertex:
+    def _get_single_path_for_vertices(
+            self, from_vt, to_vt, path=[]):
+        path = path + [from_vt]
+        if from_vt == to_vt:
             return path
-        if fromeventvertex not in self.witness_event_graph:
+        if from_vt not in self.graph:
             return None
-        for linkEventVertex in self.witness_event_graph[fromeventvertex]:
-            if linkEventVertex not in path:
-                newpath = self._get_single_path_for_witness_events(
-                    linkEventVertex,
-                    toeventvertex, path
+        for ng_vertex in self.graph[from_vt]:
+            if ng_vertex not in path:
+                newpath = self._get_single_path_for_vertices(
+                    ng_vertex,
+                    to_vt, path
                 )
                 if newpath:
                     return newpath
         return None
 
-    def _get_all_paths_for_witness_events(
-            self, fromeventvertex, toeventvertex, single_path=[]):
-        single_path = single_path + [fromeventvertex]
+    def _get_all_paths_for_vertices(
+            self, from_vertex, to_vertex, single_path=[]):
+        single_path = single_path + [from_vertex]
 
-        if fromeventvertex == toeventvertex:
+        if from_vertex == to_vertex:
             return [single_path]
 
-        if fromeventvertex not in self.witness_event_graph:
+        if from_vertex not in self.graph:
             return []
 
         multiple_paths = []
-        for linkeventvertex in self.witness_event_graph[fromeventvertex]:
-            if linkeventvertex not in single_path:
+        for ng_vertex in self.graph[from_vertex]:
+            if ng_vertex not in single_path:
                 # Recursively find path destination
                 # vertex by exploring all its connected vertex.
                 LOG.debug(
-                    "_get_all_paths_for_witness_events: "
+                    "_get_all_paths_for_vertices: "
                     "finding path from Vertex:%s to Vertex:%s "
-                    % (linkeventvertex, toeventvertex)
+                    % (ng_vertex, to_vertex)
                 )
-                paths = self._get_all_paths_for_witness_events(
-                    linkeventvertex,
-                    toeventvertex,
+                paths = self._get_all_paths_for_vertices(
+                    ng_vertex,
+                    to_vertex,
                     single_path
                 )
                 for path in paths:
                     multiple_paths.append(path)
         return multiple_paths
 
-    def _get_shortest_path_for_witness_events(
+    def _get_shortest_path_for_vertices(
             self, fromeventvertex, toeventvertex, single_path=[]):
         single_path = single_path + [fromeventvertex]
 
         if fromeventvertex == toeventvertex:
             return single_path
-        if fromeventvertex not in self.witness_event_graph:
+        if fromeventvertex not in self.graph:
             return None
 
         shortest = None
-        for linkEventVertex in self.witness_event_graph[fromeventvertex]:
+        for linkEventVertex in self.graph[fromeventvertex]:
             if linkEventVertex not in single_path:
-                new_single_path = self._get_shortest_path_for_witness_events(
+                new_single_path = self._get_shortest_path_for_vertices(
                     linkEventVertex,
                     toeventvertex,
                     single_path
@@ -109,103 +109,102 @@ class DetectiveGraph:
                         shortest = new_single_path
         return shortest
 
-    def getMultiplePathsForWitnessEvent(self, fromeventvetex, toeventvertex):
+    def get_multiple_paths(self, from_vertex, to_vertex):
         # Get multiple paths for source and destination vertex in the graph.
         # Using DFS way to find path.
         LOG.debug(
-            "getMultiplePathsForWitnessEvent: "
+            "get_multiple_paths: "
             "getting paths from Vertex:%s to Vertex:%s "
-            % (fromeventvetex, toeventvertex)
+            % (from_vertex, to_vertex)
         )
-        if fromeventvetex and toeventvertex:
-            return self._get_all_paths_for_witness_events(
-                fromeventvetex, toeventvertex
+        if from_vertex and to_vertex:
+            return self._get_all_paths_for_vertices(
+                from_vertex, to_vertex
             )
         return None
 
-    def _topologicalWitnessEvents(
-            self, fromeventvertex, eventverticesvisited, sortedwitnessevents):
-        eventverticesvisited[fromeventvertex] = True
-        for linkeventvertex in self.witness_event_graph[fromeventvertex]:
+    def _sort_topological_graph(
+            self, vt_from, vertices_visted, vt_sroted_stack):
+        vertices_visted[vt_from] = True
+        for neighbor_vertex in self.graph[vt_from]:
             try:
-                if not eventverticesvisited[linkeventvertex]:
+                if not vertices_visted[neighbor_vertex]:
                     # Recursively sort each conneceted vertices.
                     LOG.debug(
                         "_topologicalWitnessEvents: finding "
                         "topological order path from Vertex:%s "
-                        % (linkeventvertex)
+                        % (neighbor_vertex)
                     )
                     self._topologicalWitnessEvents(
-                        linkeventvertex,
-                        eventverticesvisited,
-                        sortedwitnessevents
+                        neighbor_vertex,
+                        vertices_visted,
+                        vt_sroted_stack
                     )
             except KeyError:
                 raise dt_exception.TopologicalSortKeyError(
-                    vertex_key=fromeventvertex
+                    vertex_key=vt_from
                 )
+                vt_sroted_stack.insert(0, vt_from)
 
-        sortedwitnessevents.insert(0, fromeventvertex)
-
-    def topologicalSortWitnessEvents(self):
+    def topological_graph_sort(self):
         # Topological sorting (DFS) for all witness events
         LOG.debug(
-            "topologicalSortWitnessEvents: topological sorting "
+            "topological_graph_sort: topological sorting "
             "for vertices %s "
-            % self.witness_event_vertices
+            % self.vertices
         )
-        eventVerticesVisited = {
-            each_vt: False for each_vt in self.witness_event_vertices
+        vertices_visited = {
+            each_vt: False for each_vt in self.vertices
         }
-        sortedWitnessEventsStack = []
+        vt_sroted_stack = []
 
-        for eventVertex in self.witness_event_vertices:
+        for vt in self.vertices:
             # Find all topological orders for each vertex.
-            if not eventVerticesVisited[eventVertex]:
-                self._topologicalWitnessEvents(
-                    eventVertex,
-                    eventVerticesVisited,
-                    sortedWitnessEventsStack
+            if not vertices_visited[vt]:
+                self._sort_topological_graph(
+                    vt,
+                    vertices_visited,
+                    vt_sroted_stack
                 )
-        return sortedWitnessEventsStack
+        return vt_sroted_stack
 
     def _check_if_cycle_present(
             self, vertex,
-            eventVerticesVisited, eventVerticesStack
+            vertices_visited, vertices_stack
     ):
 
-        eventVerticesVisited[vertex] = True
-        eventVerticesStack[vertex] = True
+        vertices_visited[vertex] = True
+        vertices_stack[vertex] = True
 
         # Recur for all neighbours
         # if any neighbour is visited and in
-        for linkeventvertex in self.witness_event_graph[vertex]:
-            if not eventVerticesVisited[linkeventvertex]:
+        for vt in self.graph[vertex]:
+            if not vertices_visited[vt]:
                 if self._check_if_cycle_present(
-                        linkeventvertex,
-                        eventVerticesVisited,
-                        eventVerticesStack):
+                        vt,
+                        vertices_visited,
+                        vertices_stack):
                     return True
-            elif eventVerticesStack[linkeventvertex]:
+            elif vertices_stack[vt]:
                 return True
 
         # Backtracking here..
-        eventVerticesStack[vertex] = False
+        vertices_stack[vertex] = False
         return False
 
-    def isCyclePresent(self):
-        eventVerticesVisited = {
-            each_vt: False for each_vt in self.witness_event_vertices
+    def check_cycle_present(self):
+        vertices_visited = {
+            each_vt: False for each_vt in self.vertices
         }
-        eventVerticesStack = {
-            each_vt: False for each_vt in self.witness_event_vertices
+        vertices_stack = {
+            each_vt: False for each_vt in self.vertices
         }
 
-        for each_vertex in self.witness_event_vertices:
-            if not eventVerticesVisited[each_vertex]:
+        for vt in self.vertices:
+            if not vertices_visited[vt]:
                 if self._check_if_cycle_present(
-                        each_vertex,
-                        eventVerticesVisited,
-                        eventVerticesStack):
+                        vt,
+                        vertices_visited,
+                        vertices_stack):
                     return True
         return False

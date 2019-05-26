@@ -26,7 +26,7 @@ class DetectiveApiService:
         is_cycle_present = False
 
         try:
-            is_cycle_present = self.detective_graph.isCyclePresent()
+            is_cycle_present = self.detective_graph.check_cycle_present()
             if is_cycle_present:
                 LOG.info("_predict_order_of_all_witness_events: Cycle Found: ")
                 return \
@@ -42,7 +42,7 @@ class DetectiveApiService:
 
         try:
             wintness_topolical_sorts = \
-                self.detective_graph.topologicalSortWitnessEvents()
+                self.detective_graph.topological_graph_sort()
         except Exception as e:
             LOG.error(
                 "_predict_order_of_all_witness_events: "
@@ -65,7 +65,7 @@ class DetectiveApiService:
             witness_paths = []
             try:
                 witness_paths = \
-                    self.detective_graph.getMultiplePathsForWitnessEvent(
+                    self.detective_graph.get_multiple_paths(
                         wintness_first_event_vertex, wintness_last_event_vertex
                     )
             except Exception as e:
